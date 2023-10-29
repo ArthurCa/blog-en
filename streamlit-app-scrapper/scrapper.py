@@ -1,0 +1,36 @@
+# Import packages
+import streamlit as st
+import requests
+from bs4 import BeautifulSoup
+
+# Load the HTML parser
+def parseHTML(html):
+    return BeautifulSoup(html, 'html.parser')
+
+# Main script
+def main():
+    search = st.sidebar.text_input('Search on Amazon')
+    URL = f'https://www.amazon.fr/s?k={search}'
+    req = requests.get(URL, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36 Edg/84.0.522.63", 'Accept-Language': 'en-US, en;q=0.5'})
+    res = req.text
+    parsed = parseHTML(res)
+
+    for i in range(0, 20):
+        try:
+            i+=1
+            st.text("-"*20)
+            item = parsed.select(f"#search > div.s-desktop-width-max.s-desktop-content.sg-row > div.sg-col-20-of-24.sg-col-28-of-32.sg-col-16-of-20.sg-col.sg-col-32-of-36.sg-col-8-of-12.sg-col-12-of-16.sg-col-24-of-28 > div > span:nth-child(4) > div.s-main-slot.s-result-list.s-search-results.sg-row > div:nth-child({i})")
+            # print(item)
+            if item:
+                name = item[0].select(".a-text-normal")[0].text
+                price = item[0].select(".a-price-whole")[0].text.split(".")[0]
+                st.text(f"Item: {i}\nName: {name}\nPrice: {price}")
+        except Exception as e:
+            pass
+        
+
+
+try:
+    main()
+except KeyboardInterrupt as e:
+    print("Aborted.")
